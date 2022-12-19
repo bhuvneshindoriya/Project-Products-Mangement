@@ -12,6 +12,34 @@ const regexValidEmail =/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-z
 
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,15}$/;
 
+
+exports.createUser=async (req,res)=>{
+    try{
+        const reqBody=req.body
+        console.log(reqBody.address)
+        const{password,address}=req.body
+        reqBody.address=JSON.parse(address)
+        
+       
+        console.log(reqBody)
+        let files= req.files
+        if(files && files.length>0){
+            
+        reqBody.profileImage= await aws.uploadFile( files[0] )
+        }
+        else{
+            res.status(400).send({ msg: "No file found" })
+        } 
+        reqBody.password=await bcrypt.hash(password,4) 
+        
+        const createdata=await userModel.create(reqBody)
+       return res.status(201).json({status:true,message:'User created successfully',data:createdata})
+    }catch(error){
+        return res.status(500).json({error:error.message})
+    }
+}
+
+
 exports.userLogin = async function(req,res){
   try{   let body = req.body
       let {email,password}= body

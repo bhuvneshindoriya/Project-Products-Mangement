@@ -8,7 +8,7 @@ router.get('/test-me', function(req,res){
 })
 router.post('/register',createUser)
 router.post('/login',userLogin)
-router.get("/user/:userId/profile",getUser)
+router.get("/user/:userId/profile",authenticate,authorize,getUser)
 router.put("/user/:userId/profile",authenticate , authorize, userUpdate)
 
 

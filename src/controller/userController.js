@@ -2,15 +2,16 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const userModel= require("../model/userModel");
+const aws=require('../aws/S3')
 
 
-let regexForString=/^[\w ]+$/
+// let regexForString=/^[\w ]+$/
 
-let regexValidNumber = /^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[6789]\d{9}$/;
+// let regexValidNumber = /^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[6789]\d{9}$/;
 
-const regexValidEmail =/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]{2,3})*$/ 
+// const regexValidEmail =/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]{2,3})*$/ 
 
-const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,15}$/;
+// const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,15}$/;
 
 
 exports.createUser=async (req,res)=>{
@@ -50,7 +51,7 @@ exports.userLogin = async function(req,res){
       let checkPassword = await bcrypt.compare(password,checkEmail.password)
       if(!checkPassword) return res.status(400).send({status:false,message:"Password is not correct"})
       else{
-          const token = jwt.sign({userId:checkEmail._id.tostring()},"Group-13")
+          const token = jwt.sign({userId:checkEmail._id.toString()},"Group-13")
           let obj = {
               userId:checkEmail._id,
               token : token
@@ -66,15 +67,15 @@ exports.getUser=async function(req,res){
     try{
      const userId=req.params.userId
   
-     if (!isValidObjectId(userId)) return res.status(400).send({status : false , message : "invalid userId"})
+    //  if (!isValidObjectId(userId)) return res.status(400).send({status : false , message : "invalid userId"})
   
-     if (req.decode.userId!==userId) return res.status(403).send({status : false , message : "not authorised"})
+    //  if (req.decode.userId!==userId) return res.status(403).send({status : false , message : "not authorised"})
   
-     const userIs=await userModel.findById({userId})
+     const userIs=await userModel.findById({_id:userId})
 
      if (!userIs) return res.status(404).send({status : false , message : "no user present with this id"})
   
-     if (userIs.isDeleted===true) return res.status(400).send({status : false , message : "user is already deleted"})
+    //  if (userIs.isDeleted===true) return res.status(400).send({status : false , message : "user is already deleted"})
   
      return res.status(200).send({status : true ,message: "User profile details", data : userIs})
   

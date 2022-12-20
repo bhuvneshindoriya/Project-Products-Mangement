@@ -3,15 +3,15 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const userModel= require("../model/userModel");
 const aws=require('../aws/S3')
-let {isValidEmail,isValidphone,isValidRequestBody}=require("../util/validator")
+const {isValidEmail,isValidphone,isValidRequestBody}=require('../util/validator')
 
 
 exports.createUser=async (req,res)=>{
     try{
         
         const reqBody=req.body
-        if(!isValidRequestBody(req.body)) return res.status(400).json({status:false,message:"request body must be present"})
-        const{fname,lname,profileImage,phone,password,address,email}=req.body
+        console.log(reqBody.address)
+        const{password,address}=req.body
         reqBody.address=JSON.parse(address)
         if(!fname) return res.status(400).json({status:false,message:"fname must be present"})
         if(!lname) return res.status(400).json({status:false,message:"lname must be present"})
@@ -59,7 +59,7 @@ exports.userLogin = async function(req,res){
       let checkPassword = await bcrypt.compare(password,checkEmail.password)
       if(!checkPassword) return res.status(400).send({status:false,message:"Password is not correct"})
       else{
-          const token = jwt.sign({userId:checkEmail._id.toString()},"Group-13")
+          const token = jwt.sign({userId:checkEmail._id},"Group-13")
           let obj = {
               userId:checkEmail._id,
               token : token
@@ -77,14 +77,11 @@ exports.getUser=async function(req,res){
   
     //  if (!isValidObjectId(userId)) return res.status(400).send({status : false , message : "invalid userId"})
   
-    //  if (req.decode.userId!==userId) return res.status(403).send({status : false , message : "not authorised"})
+     if (req.decode.userId!=userId) return res.status(403).send({status : false , message : "not authorised"})
   
      const userIs=await userModel.findById({_id:userId})
 
-     if (!userIs) return res.status(404).send({status : false , message : "no user present with this id"})
-  
-    //  if (userIs.isDeleted===true) return res.status(400).send({status : false , message : "user is already deleted"})
-  
+     if (!userIs) return res.status(404).send({status : false , message : "no user present with this id"})  
      return res.status(200).send({status : true ,message: "User profile details", data : userIs})
   
       }catch(error){
@@ -95,11 +92,10 @@ exports.getUser=async function(req,res){
   exports.userUpdate = async function(req,res){
     try{
         let body = req.body
-        let userID =  req.params.userID
-        if(req.decode.userId!=userID) return res.status(403).status({status:false,message:'user is not authorized'})
+        let userId =  req.params.userId
         if(!body) return res.status(400).send({status:false,message:"Body is required"})
-        if(!userID) return res.status(400).send({status:false,message:"userId in params required"})
-        let findUser = await userModel.findOneAndUpdate({_id:userID},{$set:data},{new:true})
+        
+        let findUser = await userModel.findOneAndUpdate({_id:userId},{$set:body},{new:true})
         if(!findUser)  return res.status(404).send({status:false,message:"UserId is not found"})
         return res.status(200).send({status:true,message:"User profile updated",data:findUser})
     }catch(err){

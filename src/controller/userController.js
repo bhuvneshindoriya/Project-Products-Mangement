@@ -10,8 +10,8 @@ exports.createUser=async (req,res)=>{
     try{
         
         const reqBody=req.body
-        console.log(reqBody.address)
-        const{password,address}=req.body
+       
+        const{fname,lname,phone,email,password,address}=req.body
         reqBody.address=JSON.parse(address)
         if(!fname) return res.status(400).json({status:false,message:"fname must be present"})
         if(!lname) return res.status(400).json({status:false,message:"lname must be present"})

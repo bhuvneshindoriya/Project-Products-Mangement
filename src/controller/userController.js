@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const userModel= require("../model/userModel");
 const aws=require('../aws/S3')
-const {isValidEmail,isValidphone,isValidRequestBody}=require('../util/validator')
+const {isValidEmail,isValidphone,isValidRequestBody,}=require('../util/validator')
 
 
 exports.createUser=async (req,res)=>{

@@ -5,19 +5,12 @@ const userModel= require("../model/userModel");
 const aws=require('../aws/S3')
 
 
-// let regexForString=/^[\w ]+$/
-
-// let regexValidNumber = /^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[6789]\d{9}$/;
-
-// const regexValidEmail =/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]{2,3})*$/ 
-
-// const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,15}$/;
 
 
 exports.createUser=async (req,res)=>{
     try{
         const reqBody=req.body
-        console.log(reqBody.address)
+        //console.log(reqBody.address)
         const{password,address}=req.body
         reqBody.address=JSON.parse(address)
         
@@ -51,7 +44,7 @@ exports.userLogin = async function(req,res){
       let checkPassword = await bcrypt.compare(password,checkEmail.password)
       if(!checkPassword) return res.status(400).send({status:false,message:"Password is not correct"})
       else{
-          const token = jwt.sign({userId:checkEmail._id.toString()},"Group-13")
+          const token = jwt.sign({userId:checkEmail._id},"Group-13")
           let obj = {
               userId:checkEmail._id,
               token : token
@@ -69,14 +62,11 @@ exports.getUser=async function(req,res){
   
     //  if (!isValidObjectId(userId)) return res.status(400).send({status : false , message : "invalid userId"})
   
-    //  if (req.decode.userId!==userId) return res.status(403).send({status : false , message : "not authorised"})
+     if (req.decode.userId!=userId) return res.status(403).send({status : false , message : "not authorised"})
   
      const userIs=await userModel.findById({_id:userId})
 
-     if (!userIs) return res.status(404).send({status : false , message : "no user present with this id"})
-  
-    //  if (userIs.isDeleted===true) return res.status(400).send({status : false , message : "user is already deleted"})
-  
+     if (!userIs) return res.status(404).send({status : false , message : "no user present with this id"})  
      return res.status(200).send({status : true ,message: "User profile details", data : userIs})
   
       }catch(error){
@@ -87,11 +77,10 @@ exports.getUser=async function(req,res){
   exports.userUpdate = async function(req,res){
     try{
         let body = req.body
-        let userID =  req.params.userID
-        if(req.decode.userId!=userID) return res.status(403).status({status:false,message:'user is not authorized'})
+        let userId =  req.params.userId
         if(!body) return res.status(400).send({status:false,message:"Body is required"})
-        if(!userID) return res.status(400).send({status:false,message:"userId in params required"})
-        let findUser = await userModel.findOneAndUpdate({_id:userID},{$set:data},{new:true})
+        
+        let findUser = await userModel.findOneAndUpdate({_id:userId},{$set:body},{new:true})
         if(!findUser)  return res.status(404).send({status:false,message:"UserId is not found"})
         return res.status(200).send({status:true,message:"User profile updated",data:findUser})
     }catch(err){

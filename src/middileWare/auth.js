@@ -7,7 +7,9 @@ const userModel= require("../model/userModel");
 
 exports.authenticate = (req, res, next) => {
     try{
-          let token = req.headers["x-api-key"];
+          let token = req.headers["authorization"];
+          console.log(token)
+          token = token.slice(7)
 
           if (!token) return res.status(400).send({ status: false, msg: "token must be present" });
 
@@ -29,14 +31,13 @@ exports.authenticate = (req, res, next) => {
 exports.authorize= async function ( req, res, next) {
     try{
           let userId= req.params.userId
-          let gettingUserId= await userModel.findById({_id:userId})
-          let getUser= gettingUserId.userId
+          let gettingUserId= await userModel.findById({_id: userId})
+          if(!gettingUserId) return res.status(404).send({status:false,message:"this userId is not found"})
 
-          if ( getUser !== req.decode.userId)  return res.status(403).send({ status: false, msg: "you are not Athorised" });
+          if ( userId !=req.decode.userId)  return res.status(403).send({ status: false, message: "you are not Athorised" });
 
-            return next();   
-        }
-          catch(error){
+          return next()
+    }catch(error){
           return res.status(500).send({msg: error.message})
      }
   }

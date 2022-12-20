@@ -3,29 +3,37 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const userModel= require("../model/userModel");
 const aws=require('../aws/S3')
-
-
-// let regexForString=/^[\w ]+$/
-
-// let regexValidNumber = /^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[6789]\d{9}$/;
-
-// const regexValidEmail =/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]{2,3})*$/ 
-
-// const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,15}$/;
+let {isValidEmail,isValidphone,isValidRequestBody}=require("../util/validator")
 
 
 exports.createUser=async (req,res)=>{
     try{
-        const reqBody=req.body
-        console.log(reqBody.address)
-        const{password,address}=req.body
-        reqBody.address=JSON.parse(address)
         
-       
-        console.log(reqBody)
+        const reqBody=req.body
+        if(!isValidRequestBody(req.body)) return res.status(400).json({status:false,message:"request body must be present"})
+        const{fname,lname,profileImage,phone,password,address,email}=req.body
+        reqBody.address=JSON.parse(address)
+        if(!fname) return res.status(400).json({status:false,message:"fname must be present"})
+        if(!lname) return res.status(400).json({status:false,message:"lname must be present"})
+        
+        if(!password) return res.status(400).json({status:false,message:"password must be present"})
+        if(!address) return res.status(400).json({status:false,message:"address must be present"})
+   
+        // -------email validation------
+        if(!email) return res.status(400).json({status:false,message:"email must be present"})
+        if(!isValidEmail(email)) return res.status(400).json({status:true,message:"please provide valid email"})
+        const checkemail=await userModel.findOne({email})
+        if(checkemail) return res.status(400).json({status:false,message:"email is already present in db"})
+
+        // -------phone validation------
+        if(!phone) return res.status(400).json({status:false,message:"phone must be present"})
+        if(!isValidphone(phone)) return res.status(400).json({status:false,message:"please provide valid phone number"})
+        const checkphone=await userModel.findOne({phone})
+        if(checkphone) return res.status(400).json({status:false,message:"phone number is already present in db"})
+
+        //-------create aws-s3 link------
         let files= req.files
-        if(files && files.length>0){
-            
+        if(files && files.length>0){     
         reqBody.profileImage= await aws.uploadFile( files[0] )
         }
         else{

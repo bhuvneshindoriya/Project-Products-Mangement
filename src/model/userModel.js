@@ -9,7 +9,9 @@ const User = new mongoose.Schema({
     email:{type: String, required: true, unique: true, trim: true},
 
     profileImage: {type: String, required: true, trim: true},
- 
+
+    phone: {type:String,require:true, unique:true}, 
+
     password: {type: String, required: true, trim: true},
 
     address: {

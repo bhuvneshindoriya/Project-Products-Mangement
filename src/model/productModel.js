@@ -3,69 +3,29 @@ const mongoose = require('mongoose')
 
 const productSchema = new mongoose.Schema({
 
-    title: {
-        type: String,
-        required: true,
-        unique: true,
-        trim: true
-    },
+    title: {type: String,required: true, unique: true,trim: true},
 
-    description: {
-        type: String,
-        required: true,
-        trim: true
-    },
+    description: {type: String,required: true,trim: true},
 
-    price: {
-        type: Number,
-        required: true,
-    },
+    price: {type: Number,required: true,},
 
-    currencyId: {
-        type: String,
-        required: true,
-        default: "INR"
-    },
+    currencyId: {type: String,required: true,default: "INR"},
 
-    currencyFormat: {
-        type: String,
-        required: true,
-        default: "₹"
-    },
+    currencyFormat: {type: String,required: true,default: "₹"},
 
-    isFreeShipping: {
-        type: Boolean,
-        default: false
-    },
+    isFreeShipping: {type: Boolean,default: false},
 
-    productImage: {
-        type: String,
-        required: true
-    },
+    productImage: {type: String,required: true},
 
-    style: {
-        type: String,
-        trim: true
-    },
+    style: {type: String,trim: true},
 
-    availableSizes: {
-        type: [String],
-        enum: ["S", "XS", "M", "X", "L", "XXL", "XL"],
-        required: true
-    },
+    availableSizes: {type: [String],enum: ["S", "XS", "M", "X", "L", "XXL", "XL"],required: true},
 
-    installments: {
-        type: Number
-    },
+    installments: {type: Number},
 
-    deletedAt: {
-        type: Date
-    },
+    deletedAt: {type: Date},
 
-    isDeleted: {
-        type: Boolean,
-        default: false
-    },
+    isDeleted: {type: Boolean,default: false},
 
 }, { timestamps: true })
 

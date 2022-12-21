@@ -180,6 +180,6 @@ exports.deletProduct=async function(req,res){
     }catch(error){
         return res.status(500).send({status:false , message : error.message})
       }
-}
+    }
 
 

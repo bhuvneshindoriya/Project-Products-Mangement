@@ -13,7 +13,7 @@ router.get("/user/:userId/profile",authenticate,getUser)
 router.put("/user/:userId/profile",authenticate ,authorize, userUpdate)
 
 
-//**Poduct**
+//**Product**
 router.post('/products',createProduct)
 router.get('/products',getProductByQuery)
 router.get('/products/:productId',getProduct)

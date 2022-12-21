@@ -103,6 +103,7 @@ exports.getProductByQuery = async function(req,res) {
  
 
 // ====> get product by product id (params) <=====
+
 exports.getProduct=async function(req,res){
     try{
       const productId=req.params.productId
@@ -125,7 +126,7 @@ exports.updateProduct= async function(req,res){
  try {  let body = req.body
     let productId = req.params.productId
     let files = req.files
-    let { title, description, price, isFreeShipping, style, availableSizes, installments, productImage } =body
+    let { title, description, price, isFreeShipping, style, availableSizes, installments,} =body
    //if(!isValidRequestBody(body)) return res.status(400).send({status:false,message:"Please enter atleast one update"})
     if(!isValidObjectId(productId)) return res.status(400).send({status:false,message:"Please enter valid productId in params"})
     let obj = {}
@@ -134,6 +135,10 @@ exports.updateProduct= async function(req,res){
         if(checkTitle) return res.status(400).send({status:false,message:"Please provide another title"})
         obj.title= title
     }
+    if(files){     
+        obj.productImage= await aws.uploadFile( files[0] )
+        console.log(obj.productImage)
+        }
     if(description){
         obj.description= description
     }
@@ -152,10 +157,7 @@ exports.updateProduct= async function(req,res){
     if(installments){
         obj.installments=installments
     }
-    if(productImage){
-        let uploadedFile = await aws.uploadFile(files[0])
-        obj.productImage=uploadedFile
-    }
+   
     let productUpdate = await productModel.findOneAndUpdate({isDeleted:false,_id:productId},{$set:obj},{new:true})
     if(!productUpdate) return res.status(404).send({status:false,message:"product not found"})
     return res.status(200).send(({status:true,data:productUpdate}))

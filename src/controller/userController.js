@@ -46,18 +46,21 @@ exports.createUser=async (req,res)=>{
         else{
             res.status(400).send({ msg: "profileimage must be present" })
         } 
-        reqBody.password=await bcrypt.hash(password,4) 
+        reqBody.password=await bcrypt.hash(password,10) 
 
-        // let {shipping,billing}=req.body.address
-        // if (!shipping) return res.status(400).send({ status: false, message: "Enter Shipping Address." })
+      
+        let newaddress=JSON.parse(address)
+        let {shipping,billing}=newaddress
+        
+        if (!shipping.street) return res.status(400).send({ status: false, message: "Enter Shipping Address." })
 
-        //if (!isValidBody(shipping.street)) { return res.status(400).send({ status: false, message: 'Please enter Shipping street' }) }
+        if (!isValidBody(shipping.street)) { return res.status(400).send({ status: false, message: 'Please enter Shipping street' }) }
 
-        // if (!isValidBody(shipping.city)) { return res.status(400).send({ status: false, message: 'Please enter Shipping city' }) }
-        // if (!isValidCity(shipping.city)) { return res.status(400).send({ status: false, message: 'Invalid Shipping city' }) }
+        // if (!isValidCityc(shipping.city)) { return res.status(400).send({ status: false, message: 'Please enter Shipping city' }) }
+        if (!isValidCity(shipping.city)) { return res.status(400).send({ status: false, message: 'Invalid Shipping city' }) }
 
         // if (!isValidBody(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Please enter Shipping pin' }) }
-        // if (!isValidPinCode(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Invalid Shipping Pin Code.' }) }
+        if (!isValidPinCode(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Invalid Shipping Pin Code.' }) }
 
 
         // //if (!billing) return res.status(400).send({ status: false, message: "please enter billing" })
@@ -129,12 +132,12 @@ exports.getUser=async function(req,res){
         let userId =  req.params.userId
         let { fname, lname, email, phone, password, address } = body
       
-       
-       let files= req.files.profileImage
+        let files= req.files
         if(files){     
         body.profileImage= await aws.uploadFile( files[0] )
+        console.log(body.profileImage)
         }
-     
+    
         if(fname){
             if(!isValidName(fname)) return res.status(400).send({status:false,message:"please provide valid fname"})
         }

@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const userModel= require("../model/userModel");
 const aws=require('../aws/S3')
-const {isValidEmail,isValidphone,isValidRequestBody}=require('../util/validator')
+const {isValidEmail,isValidObjectId,isValidphone,isValidBody,isValidRequestBody,isValidName,isValidpassword,isValidCity,isValidPinCode,isValidProductName,isValidPrice,isValidateSize,isValidInstallment,isValidImage}=require('../util/validator')
 
 
 exports.createUser=async (req,res)=>{
@@ -12,24 +12,52 @@ exports.createUser=async (req,res)=>{
         const reqBody=req.body
        if(!isValidRequestBody(req.body)) return res.status(400).json({status:false,message:"requesbody must be present"})
         const{fname,lname,phone,email,password,address}=req.body
+        let {shipping,billing}=req.body.address
         reqBody.address=JSON.parse(address)
         if(!fname) return res.status(400).json({status:false,message:"fname must be present"})
+        if (!isValidBody(fname)) { return res.status(400).send({ status: false, message: 'Please enter fname' }) }
+        if (!isValidName(fname)) { return res.status(400).send({ status: false, message: 'fname should be in alphabets' }) }
         if(!lname) return res.status(400).json({status:false,message:"lname must be present"})
-        
+        if (!isValidBody(lname)) { return res.status(400).send({ status: false, message: 'Please enter lname' }) }
+        if (!isValidName(lname)) { return res.status(400).send({ status: false, message: 'lname should be in alphabets' }) }
         if(!password) return res.status(400).json({status:false,message:"password must be present"})
         if(!address) return res.status(400).json({status:false,message:"address must be present"})
    
         // -------email validation------
         if(!email) return res.status(400).json({status:false,message:"email must be present"})
         if(!isValidEmail(email)) return res.status(400).json({status:true,message:"please provide valid email"})
-        const checkemail=await userModel.findOne({email})
+        const checkemail=await userModel.findOne({email:email})
         if(checkemail) return res.status(400).json({status:false,message:"email is already present in db"})
 
         // -------phone validation------
         if(!phone) return res.status(400).json({status:false,message:"phone must be present"})
         if(!isValidphone(phone)) return res.status(400).json({status:false,message:"please provide valid phone number"})
-        const checkphone=await userModel.findOne({phone})
+        const checkphone=await userModel.findOne({phone:phone})
         if(checkphone) return res.status(400).json({status:false,message:"phone number is already present in db"})
+        if(!password) return res.status(400).json({status:false,message:"password must be present"})
+        if(!isValidpassword(password)) return res.status(400).send({status:false,message:"Please provide valid password"})
+
+
+        // if (!shipping) return res.status(400).send({ status: false, message: "Enter Shipping Address." })
+
+        //if (!isValidBody(shipping.street)) { return res.status(400).send({ status: false, message: 'Please enter Shipping street' }) }
+
+        // if (!isValidBody(shipping.city)) { return res.status(400).send({ status: false, message: 'Please enter Shipping city' }) }
+        // if (!isValidCity(shipping.city)) { return res.status(400).send({ status: false, message: 'Invalid Shipping city' }) }
+
+        // if (!isValidBody(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Please enter Shipping pin' }) }
+        // if (!isValidPinCode(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Invalid Shipping Pin Code.' }) }
+
+
+        // //if (!billing) return res.status(400).send({ status: false, message: "please enter billing" })
+
+        // if (!isValidBody(billing.street)) { return res.status(400).send({ status: false, message: 'Please enter billing street' }) }
+
+        // if (!isValidBody(billing.city)) { return res.status(400).send({ status: false, message: 'Please enter billing city' }) }
+        // if (!isValidCity(billing.city)) { return res.status(400).send({ status: false, message: 'Invalid billing city' }) }
+
+        // if (!isValidBody(billing.pincode)) { return res.status(400).send({ status: false, message: 'Please enter billing pin' }) }
+        // if (!isValidPinCode(billing.pincode)) { return res.status(400).send({ status: false, message: 'Invalid billing Pin Code.' }) }
 
         //-------create aws-s3 link------
         let files= req.files
@@ -53,7 +81,9 @@ exports.userLogin = async function(req,res){
   try{   let body = req.body
       let {email,password}= body
       if(!email) return res.status(400).send({status:false,message:"email is required"})
+      if(!isValidEmail(email)) return res.status(400).send({status:false,message:"please provide valid email"})
       if(!password)return res.status(400).send({status:false,message:"password is required"})
+      if(!isValidpassword(password))return res.status(400).send({status:false,message:"please provide valid password"})
       let checkEmail = await userModel.findOne({email :email})
       if(!checkEmail) return res.status(404).send({status:false,message:"email is not reg."})
       let checkPassword = await bcrypt.compare(password,checkEmail.password)
@@ -75,7 +105,7 @@ exports.getUser=async function(req,res){
     try{
      const userId=req.params.userId
   
-    //  if (!isValidObjectId(userId)) return res.status(400).send({status : false , message : "invalid userId"})
+    if (!isValidObjectId(userId)) return res.status(400).send({status : false , message : "invalid userId"})
   
      if (req.decode.userId!=userId) return res.status(403).send({status : false , message : "not authorised"})
   
@@ -93,8 +123,50 @@ exports.getUser=async function(req,res){
     try{
         let body = req.body
         let userId =  req.params.userId
-        if(!body) return res.status(400).send({status:false,message:"Body is required"})
-        
+        let { fname, lname, email, phone, password, address } = body
+      
+        let files= req.files
+        if(files && files.length>0){     
+        reqBody.profileImage= await aws.uploadFile( files[0] )
+        }
+        else{
+           return  res.status(400).send({ msg: "No file found" })
+        } 
+      
+        if(fname){
+            if(!isValidName(fname)) return res.status(400).send({status:false,message:"please provide valid fname"})
+        }
+        if(lname){
+            if(!isValidName(lname)) return res.status(400).send({status:false,message:"please provide valid lname"})
+        }
+        if(email) {
+            if(!isValidEmail(email)) return res.status(400).send({status:false,message:"please provide valid email"})
+        }
+        if(password){
+            if(!isValidpassword(password))  return res.status(400).send({status:false,message:"please provide valid password"})
+        }
+        if(phone){
+            if(!isValidphone(phone)) return res.status(400).send({status:false,message:"Please provide valid phone number"})
+        }
+        let {shipping, billing} = body.address
+        if(shipping){
+            if(!isValidCity(shipping.city)){
+                return res.status(400).send({status:false,message:"Please provide valid city"})
+            }
+            if(!isValidPinCode(shipping.pincode)){
+                return res.status(400).send({status:false,message:"please provide valid pincode"})
+            }
+        }
+        if(billing){
+            if(!isValidCity(billing.city)){
+                return res.status(400).send({status:false,message:"Please provide valid city"})
+            }
+            if(!isValidPinCode(billing.pincode)){
+                return res.status(400).send({status:false,message:"please provide valid pincode"})
+            }
+        }
+    
+
         let findUser = await userModel.findOneAndUpdate({_id:userId},{$set:body},{new:true})
         if(!findUser)  return res.status(404).send({status:false,message:"UserId is not found"})
         return res.status(200).send({status:true,message:"User profile updated",data:findUser})

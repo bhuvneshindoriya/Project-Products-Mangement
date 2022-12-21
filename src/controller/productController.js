@@ -103,7 +103,6 @@ exports.getProductByQuery = async function(req,res) {
  
 
 // ====> get product by product id (params) <=====
-
 exports.getProduct=async function(req,res){
     try{
       const productId=req.params.productId

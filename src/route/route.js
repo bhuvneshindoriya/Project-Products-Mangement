@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const {createUser,userLogin,getUser,userUpdate}=require("../controller/userController")
-const {createProduct, getProduct, getProductByQuery, updateProduct}= require('../controller/productController')
+const {createProduct, getProduct, getProductByQuery, updateProduct, deletProduct}= require('../controller/productController')
 const {authenticate,authorize}=require('../middileWare/auth')
 
 router.get('/test-me', function(req,res){
@@ -18,6 +18,7 @@ router.post('/products',createProduct)
 router.get('/products',getProductByQuery)
 router.get('/products/:productId',getProduct)
 router.put('/products/:productId',updateProduct)
+router.delete('/products/:productId',deletProduct)
 
 
 module.exports = router;

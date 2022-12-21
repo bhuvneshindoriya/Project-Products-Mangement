@@ -165,3 +165,21 @@ exports.updateProduct= async function(req,res){
 }
 }
 
+exports.deletProduct=async function(req,res){
+    try{
+      const productId=req.params.productId
+       
+     if (!isValidObjectId(productId)) return res.status(400).send({status : false , message : "please provide valid product id"})
+
+      const deletedProduct=await productModel.findOneAndUpdate({_id:productId,isDeleted:false},{$set:{isDeleted:true,deletedAt:Date.now()}},{new:true})
+
+      if (!deletedProduct) return res.status(404).send({status : false , message : "Product is not found or Already Deleted"})
+
+     return res.status(200).send({status : true ,message: "product successfully deleted"})
+      
+    }catch(error){
+        return res.status(500).send({status:false , message : error.message})
+      }
+}
+
+

@@ -8,7 +8,6 @@ const userModel= require("../model/userModel");
 exports.authenticate = (req, res, next) => {
     try{
           let token = req.headers["authorization"];
-          console.log(token)
           token = token.slice(7)
 
           if (!token) return res.status(400).send({ status: false, msg: "token must be present" });

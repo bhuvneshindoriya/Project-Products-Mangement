@@ -19,9 +19,7 @@ exports.createUser=async (req,res)=>{
         reqBody.address=JSON.parse(address)
         if(!fname) return res.status(400).json({status:false,message:"fname must be present"})
         if (!isValidBody(fname)) { return res.status(400).send({ status: false, message: 'Please enter fname' }) }
-        if (!isValidName(fname)) { return res.status(400).send({ status: false, message: 'fname should be in alphabets' }) }
         if(!lname) return res.status(400).json({status:false,message:"lname must be present"})
-        if (!isValidBody(lname)) { return res.status(400).send({ status: false, message: 'Please enter lname' }) }
         if (!isValidName(lname)) { return res.status(400).send({ status: false, message: 'lname should be in alphabets' }) }
         if(!password) return res.status(400).json({status:false,message:"password must be present"})
         if(!address) return res.status(400).json({status:false,message:"address must be present"})
@@ -34,22 +32,35 @@ exports.createUser=async (req,res)=>{
 
         // -------phone validation------
         if(!phone) return res.status(400).json({status:false,message:"phone must be present"})
-        if(!isValidphone(phone)) return res.status(400).json({status:false,message:"please provide valid phone number"})
+        if(!isValidphone(phone)) return res.status(400).json({status:false,message:"please provide valid indian phone number"})
         const checkphone=await userModel.findOne({phone:phone})
         if(checkphone) return res.status(400).json({status:false,message:"phone number is already present in db"})
         if(!password) return res.status(400).json({status:false,message:"password must be present"})
         if(!isValidpassword(password)) return res.status(400).send({status:false,message:"Please provide valid password"})
+        
+        // -------create aws-s3 link------
+        let files= req.files
+        if(files && files.length>0){     
+        reqBody.profileImage= await aws.uploadFile( files[0] )
+        }
+        else{
+            res.status(400).send({ msg: "profileimage must be present" })
+        } 
+        reqBody.password=await bcrypt.hash(password,10) 
 
-        let {shipping,billing}=req.body.address
-        // if (!shipping) return res.status(400).send({ status: false, message: "Enter Shipping Address." })
+      
+        let newaddress=JSON.parse(address)
+        let {shipping,billing}=newaddress
+        
+        if (!shipping.street) return res.status(400).send({ status: false, message: "Enter Shipping Address." })
 
-        //if (!isValidBody(shipping.street)) { return res.status(400).send({ status: false, message: 'Please enter Shipping street' }) }
+        if (!isValidBody(shipping.street)) { return res.status(400).send({ status: false, message: 'Please enter Shipping street' }) }
 
-        // if (!isValidBody(shipping.city)) { return res.status(400).send({ status: false, message: 'Please enter Shipping city' }) }
-        // if (!isValidCity(shipping.city)) { return res.status(400).send({ status: false, message: 'Invalid Shipping city' }) }
+        // if (!isValidCityc(shipping.city)) { return res.status(400).send({ status: false, message: 'Please enter Shipping city' }) }
+        if (!isValidCity(shipping.city)) { return res.status(400).send({ status: false, message: 'Invalid Shipping city' }) }
 
         // if (!isValidBody(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Please enter Shipping pin' }) }
-        // if (!isValidPinCode(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Invalid Shipping Pin Code.' }) }
+        if (!isValidPinCode(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Invalid Shipping Pin Code.' }) }
 
 
         // //if (!billing) return res.status(400).send({ status: false, message: "please enter billing" })
@@ -63,14 +74,7 @@ exports.createUser=async (req,res)=>{
         // if (!isValidPinCode(billing.pincode)) { return res.status(400).send({ status: false, message: 'Invalid billing Pin Code.' }) }
 
         //-------create aws-s3 link------
-        let files= req.files
-        if(files && files.length>0){     
-        reqBody.profileImage= await aws.uploadFile( files[0] )
-        }
-        else{
-            res.status(400).send({ msg: "No file found" })
-        } 
-        reqBody.password=await bcrypt.hash(password,4) 
+       
         
         const createdata=await userModel.create(reqBody)
        return res.status(201).json({status:true,message:'User created successfully',data:createdata})
@@ -128,13 +132,12 @@ exports.getUser=async function(req,res){
         let userId =  req.params.userId
         let { fname, lname, email, phone, password, address } = body
       
-       
-       let files= req.files.profileImage
+        let files= req.files
         if(files){     
         body.profileImage= await aws.uploadFile( files[0] )
+        console.log(body.profileImage)
         }
-     
-
+    
         if(fname){
             if(!isValidName(fname)) return res.status(400).send({status:false,message:"please provide valid fname"})
         }
@@ -169,8 +172,6 @@ exports.getUser=async function(req,res){
         //         return res.status(400).send({status:false,message:"please provide valid pincode"})
         //     }
         // }
-    
-
         let findUser = await userModel.findOneAndUpdate({_id:userId},{$set:body},{new:true})
         if(!findUser)  return res.status(404).send({status:false,message:"UserId is not found"})
         return res.status(200).send({status:true,message:"User profile updated",data:findUser})

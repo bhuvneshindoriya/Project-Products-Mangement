@@ -20,7 +20,7 @@ const isValidBody = function (Stringvalue) {
   };
 
 
-const isValidName = (value) => { return (/^[A-Z a-z]+$/).test(value); }
+const isValidName = (value) => { return (/^[A-Za-z]+$/).test(value); }
 const isValidpassword = (value) => { return (/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,15}$/.test(value)); }
 const isValidCity = (value) => { return (/^[A-za-z]+$/).test(value) }
 const isValidPinCode = (value) => { return (/^[1-9][0-9]{5}$/).test(value) }

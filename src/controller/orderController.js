@@ -63,3 +63,35 @@ exports.createOrder = async function (req, res) {
       res.status(500).send({ status: false, message: error.message });
     }
   }
+  exports.updateOrder = async function (req, res){
+    try {
+
+        let data = req.body
+        let userId = req.params.userId
+
+        let{ orderId, status} = data
+        if(!isValidObjectId(userId)){
+            return res.status(400).send({ status : false, message : "UserId is not valid"})
+        }
+         if(!orderId){
+            return res.status(400).send({ status : false, message : "OrderId is missing"})
+         }
+         let checkStatus = await orderModel.findById(orderId)
+         if(checkStatus.cancellable==false) return res.status(400).send({status:false,message:"This order can't be cancellable"})
+
+        let newStatus = {}
+        if(status){
+            if(!(status =="completed" || status == "cancled")){
+                return res.status(400).send({ status : false, message : "status can be from enum only"})
+            }else{
+                newStatus.status = status
+            }
+        }
+
+        const orderCancel = await orderModel.findOneAndUpdate({ _id: orderId },newStatus,{ new: true });
+        return res.status(200).send({ status: true, message: "Success", data: orderCancel });
+    }catch(err){
+       return res.status(500).send({message:err.message})
+    }
+}
+ 

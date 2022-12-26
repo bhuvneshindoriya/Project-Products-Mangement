@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const cartModel = require('../model/cartModel');
 
 const userModel= require("../model/userModel");
 

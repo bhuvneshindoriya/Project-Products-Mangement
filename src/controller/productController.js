@@ -20,7 +20,7 @@ exports.createProduct= async function(req,res){
     if(!availableSizes) return res.status(400).json({status:false,message:"availablesizes must be present"})
     if(!isValidateSize(availableSizes)) return res.status(400).json({status:false,message:"only use[S, XS, M, X, L, XXL, XL]"})
 
-    if(!isValidNo(installments)) return res.status(400).json({status:false,message:"use only numbers[0-9]"})
+    //if(!isValidNo(installments)) return res.status(400).json({status:false,message:"use only numbers[0-9]"})
     // ------title validation-----
     if(!title) return res.status(400).json({status:false,message:"title must be present"})
     if(!isValidName(title)) return res.status(400).json({status:false,message:"please only use a-z & A-Z alphabates"})

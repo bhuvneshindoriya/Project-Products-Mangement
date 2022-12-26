@@ -244,3 +244,28 @@ catch(err){
        return res.status(500).send({status:false,message:err.message})
    }
 }
+
+
+
+exports.deleteCart= async function(req,res){
+ 
+  try{
+      const userId=req.params.userId;
+     
+      if (!isValidObjectId(userId)) return res.status(400).send({status : false , message : "invalid userId"})
+      
+     if (req.decode.userId!=userId) return res.status(403).send({status : false , message : "you are not authorised"})
+
+      const updateData = await cartModel.findOneAndUpdate({ userId: userId }, { $set: { items: [], totalItems: 0, totalPrice: 0 }}, { new: true })
+
+      if(!updateData) return res.status(404).send({status:false, msg:"user not exist"})
+
+      return res.status(204).send()
+
+  }
+
+catch(err){     
+          return res.status(500).send({status:false,message:err.message})
+ }
+
+}

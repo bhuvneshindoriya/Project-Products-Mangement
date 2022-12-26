@@ -49,29 +49,29 @@ exports.createUser=async (req,res)=>{
         reqBody.password=await bcrypt.hash(password,10) 
 
       
-        let newaddress=JSON.parse(address)
-        let {shipping,billing}=newaddress
+        // let newaddress=JSON.parse(address)
+        // let {shipping,billing}=newaddress
         
-        if (!shipping.street) return res.status(400).send({ status: false, message: "Enter Shipping Address." })
+        // if (!shipping.street) return res.status(400).send({ status: false, message: "Enter Shipping Address." })
 
-        if (!isValidBody(shipping.street)) { return res.status(400).send({ status: false, message: 'Please enter Shipping street' }) }
+        // if (!isValidBody(shipping.street)) { return res.status(400).send({ status: false, message: 'Please enter Shipping street' }) }
 
-        // if (!isValidCityc(shipping.city)) { return res.status(400).send({ status: false, message: 'Please enter Shipping city' }) }
-        if (!isValidCity(shipping.city)) { return res.status(400).send({ status: false, message: 'Invalid Shipping city' }) }
+        // // if (!isValidCityc(shipping.city)) { return res.status(400).send({ status: false, message: 'Please enter Shipping city' }) }
+        // if (!isValidCity(shipping.city)) { return res.status(400).send({ status: false, message: 'Invalid Shipping city' }) }
 
-        // if (!isValidBody(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Please enter Shipping pin' }) }
-        if (!isValidPinCode(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Invalid Shipping Pin Code.' }) }
+        // // if (!isValidBody(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Please enter Shipping pin' }) }
+        // if (!isValidPinCode(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Invalid Shipping Pin Code.' }) }
 
 
-        // //if (!billing) return res.status(400).send({ status: false, message: "please enter billing" })
+        // // //if (!billing) return res.status(400).send({ status: false, message: "please enter billing" })
 
-        // if (!isValidBody(billing.street)) { return res.status(400).send({ status: false, message: 'Please enter billing street' }) }
+        // // if (!isValidBody(billing.street)) { return res.status(400).send({ status: false, message: 'Please enter billing street' }) }
 
-        // if (!isValidBody(billing.city)) { return res.status(400).send({ status: false, message: 'Please enter billing city' }) }
-        // if (!isValidCity(billing.city)) { return res.status(400).send({ status: false, message: 'Invalid billing city' }) }
+        // // if (!isValidBody(billing.city)) { return res.status(400).send({ status: false, message: 'Please enter billing city' }) }
+        // // if (!isValidCity(billing.city)) { return res.status(400).send({ status: false, message: 'Invalid billing city' }) }
 
-        // if (!isValidBody(billing.pincode)) { return res.status(400).send({ status: false, message: 'Please enter billing pin' }) }
-        // if (!isValidPinCode(billing.pincode)) { return res.status(400).send({ status: false, message: 'Invalid billing Pin Code.' }) }
+        // // if (!isValidBody(billing.pincode)) { return res.status(400).send({ status: false, message: 'Please enter billing pin' }) }
+        // // if (!isValidPinCode(billing.pincode)) { return res.status(400).send({ status: false, message: 'Invalid billing Pin Code.' }) }
 
         //-------create aws-s3 link------
        
@@ -130,12 +130,11 @@ exports.getUser=async function(req,res){
     try{
         let body = req.body
         let userId =  req.params.userId
-        let { fname, lname, email, phone, password, address } = body
+        let { fname, lname, email, phone, password} = body
       
         let files= req.files
-        if(files){     
+        if(files.length>0){     
         body.profileImage= await aws.uploadFile( files[0] )
-        console.log(body.profileImage)
         }
     
         if(fname){
@@ -149,6 +148,7 @@ exports.getUser=async function(req,res){
         }
         if(password){
             if(!isValidpassword(password))  return res.status(400).send({status:false,message:"please provide valid password"})
+            body.password=await bcrypt.hash(password,10) 
         }
         if(phone){
             if(!isValidphone(phone)) return res.status(400).send({status:false,message:"Please provide valid phone number"})

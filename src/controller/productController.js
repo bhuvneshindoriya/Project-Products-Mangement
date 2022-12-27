@@ -3,7 +3,7 @@ const aws = require('../aws/S3')
 
 const validator= require('../util/validator')
 //const { isValidObjectId } = require('mongoose')
-const {isValidEmail,isValidObjectId,isValidphone,isValidBody,isValidRequestBody,isValidName,isValidpassword,isValidCity,isValidPinCode,isValidProductName,isValidPrice,isValidateSize,isValidNo,isValidImage}=require('../util/validator')
+const {isValidEmail,isValidObjectId,isValidphone,isValidBody,isValidRequestBody,isValidName,isValidPrice,isValidateSize,isValidNo}=require('../util/validator')
 
 // -------create-product-------
 exports.createProduct= async function(req,res){

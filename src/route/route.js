@@ -4,7 +4,7 @@ const {createUser,userLogin,getUser,userUpdate}=require("../controller/userContr
 const {createProduct, getProduct, getProductByQuery, updateProduct, deletProduct}= require('../controller/productController')
 const {authenticate,authorize}=require('../middileWare/auth');
 
-const { createCart, updateCart,getCart,deleteCart } = require("../controller/cartController");
+const { createCart, updateCart,getCart,deleteCart} = require("../controller/cartController");
 const {createOrder, updateOrder}= require('../controller/orderController')
 
 

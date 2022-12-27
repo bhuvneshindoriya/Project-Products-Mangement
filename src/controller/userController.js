@@ -8,19 +8,17 @@ const {isValidEmail,isValidObjectId,isValidphone,isValidBody,isValidRequestBody,
 
 
 
-
+// -------create-user------
 exports.createUser=async (req,res)=>{
     try{
-        
         const reqBody=req.body
        if(!isValidRequestBody(req.body)) return res.status(400).json({status:false,message:"requesbody must be present"})
         let{fname,lname,phone,email,password,address}=req.body
       
         if(!fname) return res.status(400).json({status:false,message:"fname must be present"})
-        if (!isValidBody(fname)) { return res.status(400).send({ status: false, message: 'Please enter fname' }) }
+        if (!isValidName(fname)) { return res.status(400).send({ status: false, message: 'Please enter fname' }) }
         if(!lname) return res.status(400).json({status:false,message:"lname must be present"})
         if (!isValidName(lname)) { return res.status(400).send({ status: false, message: 'lname should be in alphabets' }) }
-        if(!password) return res.status(400).json({status:false,message:"password must be present"})
         if(!address) return res.status(400).json({status:false,message:"address must be present"})
     
         reqBody.address=JSON.parse(address)
@@ -87,7 +85,7 @@ exports.createUser=async (req,res)=>{
     }
 }
 
-
+// -------login-user------
 exports.userLogin = async function(req,res){
   try{   let body = req.body
       let {email,password}= body
@@ -111,7 +109,7 @@ exports.userLogin = async function(req,res){
   }}
   
 
-
+// -------get-user by id------
 exports.getUser=async function(req,res){
     try{
      const userId=req.params.userId
@@ -131,15 +129,19 @@ exports.getUser=async function(req,res){
       }
   }
   
+  // -------update-user-details------
   exports.userUpdate = async function(req,res){
     try{
         let body = req.body
         let userId =  req.params.userId
+
         let { fname, lname, email, phone, password,address} = body
 
        if(!isValidRequestBody(body)) return res.status(400).send({status:false,messsage:"Please provide body"})
+
         let files= req.files
-        if(files>0){     
+        if(files){     
+
         body.profileImage= await aws.uploadFile( files[0] )
         }
   
@@ -188,7 +190,7 @@ exports.getUser=async function(req,res){
         let findUser = await userModel.findOneAndUpdate({_id:userId},{$set:body},{new:true})
         if(!findUser)  return res.status(404).send({status:false,message:"UserId is not found"})
         return res.status(200).send({status:true,message:"User profile updated",data:findUser})
-    }catch(err){
+    } catch(err){
         return res.status(500).send({status:false,message:err.message})
     }
 }

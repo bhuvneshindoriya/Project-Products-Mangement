@@ -3,9 +3,9 @@ const aws = require('../aws/S3')
 
 const validator= require('../util/validator')
 //const { isValidObjectId } = require('mongoose')
-const {isValidEmail,isValidObjectId,isValidphone,isValidBody,isValidRequestBody,isValidName,isValidpassword,isValidCity,isValidPinCode,isValidProductName,isValidPrice,isValidateSize,isValidNo,isValidImage}=require('../util/validator')
+const {isValidEmail,isValidObjectId,isValidphone,isValidBody,isValidRequestBody,isValidName,isValidPrice,isValidateSize,isValidNo}=require('../util/validator')
 
-
+// -------create-product-------
 exports.createProduct= async function(req,res){
     let body = req.body
     if(!isValidRequestBody(req.body)) return res.status(400).json({status:false,message:"requesbody must be present"})
@@ -20,10 +20,13 @@ exports.createProduct= async function(req,res){
     if(!availableSizes) return res.status(400).json({status:false,message:"availablesizes must be present"})
     if(!isValidateSize(availableSizes)) return res.status(400).json({status:false,message:"only use[S, XS, M, X, L, XXL, XL]"})
 
-    //if(!isValidNo(installments)) return res.status(400).json({status:false,message:"use only numbers[0-9]"})
+    if(installments){
+        if(!isValidNo(installments)) return res.status(400).json({status:false,message:"in installment use only numbers"})
+    }
+
     // ------title validation-----
     if(!title) return res.status(400).json({status:false,message:"title must be present"})
-   // if(!isValidName(title)) return res.status(400).json({status:false,message:"please only use a-z & A-Z alphabates"})
+   if(!isValidName(title)) return res.status(400).json({status:false,message:"please only use a-z & A-Z alphabates"})
     const checktitle=await productModel.findOne({title})
     if(checktitle) return res.status(400).json({status:false,message:"title is already present"})
     // ------create aws-s3 link-----
@@ -35,24 +38,20 @@ exports.createProduct= async function(req,res){
         else{
             res.status(400).send({ message: "productimage must be present" })
         } 
-    let createUser = await productModel.create(body)
-    return res.status(201).send({status:true,message:"Success",data:createUser})
+    let createProduct = await productModel.create(body)
+        return res.status(201).send({ status: true, message: "Success", data:createProduct  })
+      
 }
-//isvalidName validation
-//message sccesss
 
+// get product by querys(filter)
 exports.getProductByQuery = async function(req,res) {
 
     try {
-
         let data = req.query
-
- 
         let { size, name, priceGreaterThan, priceLessThan, priceSort} = data
 
         let obj = { isDeleted: false }
 
-      
         if (size) {
             if (!validator.isValidBody(size)) return res.status(400).send({ status: false, message: "Please enter Size" });
             obj.availableSizes = size 
@@ -64,14 +63,12 @@ exports.getProductByQuery = async function(req,res) {
             obj.title =  name 
         }
 
-
         if (priceGreaterThan) {
             if (!validator.isValidBody(priceGreaterThan)) return res.status(400).send({ status: false, message: "Please enter Price Greater Than" });
             if (!validator.isValidPrice(priceGreaterThan)) return res.status(400).send({ status: false, message: "priceGreaterThan must be number" });
             obj.price = { $gt: priceGreaterThan }
         }
 
-      
         if (priceLessThan) {
             if (!validator.isValidBody(priceLessThan)) return res.status(400).send({ status: false, message: "Please enter Price Lesser Than" });
             if (!validator.isValidPrice(priceLessThan)) return res.status(400).send({ status: false, message: "priceLessThan must be number" });
@@ -82,28 +79,23 @@ exports.getProductByQuery = async function(req,res) {
             obj.price = { $gt: priceGreaterThan, $lt: priceLessThan }
         }
 
-      
         if (priceSort) {
             if (!(priceSort == -1 || priceSort == 1)) return res.status(400).send({ status: false, message: "Please Enter '1' for Sort in Ascending Order or '-1' for Sort in Descending Order" });
         }
 
-    
         let getProduct = await productModel.find(obj).sort({ price: priceSort })
 
-   
         if (getProduct.length == 0) return res.status(404).send({ status: false, message: "Product Not Found." })
 
         return res.status(200).send({ status: true, message: "Success", data: getProduct })
 
     } catch (error) {
-
         return res.status(500).send({ status: false, message: error.message })
     }
 }
 
- 
 
-// ====> get product by product id (params) <=====
+//----- get product by product id (params)-----
 
 exports.getProduct=async function(req,res){
     try{
@@ -131,30 +123,35 @@ exports.updateProduct= async function(req,res){
    if(!isValidRequestBody(body)) return res.status(400).send({status:false,message:"Please enter atleast one update"})
     if(!isValidObjectId(productId)) return res.status(400).send({status:false,message:"Please enter valid productId in params"})
     if(title){
+        if(!isValidName(title)) return res.status(400).send({status:false,message:"in title use only alphabates"})
         let checkTitle =  await productModel.findOne({title:title})
-        if(checkTitle) return res.status(400).send({status:false,message:"Please provide another title"})
+        if(checkTitle) return res.status(400).send({status:false,message:"title is already present"})
         body.title= title
     }
     if(files.length>0){     
         body.productImage= await aws.uploadFile( files[0] )
-        console.log(obj.productImage)
         }
     if(description){
+        if(!isValidName(description)) return res.status(400).send({status:false,message:"in description use only alphabates"})
         body.description= description
     }
     if(price){
+        if(!isValidPrice(price)) return res.status(400).send({status:false,message:"in price use only numbers"})
         body.price=price
     }
     if(isFreeShipping){
         body.isFreeShipping=isFreeShipping
     }
     if(style){
+        if(!isValidName(description)) return res.status(400).send({status:false,message:"in style use only alphabates"})
         body.style=style
     }
     if(availableSizes){
+        if(!isValidateSize(availableSizes)) return res.status(400).json({status:false,message:"only use[S, XS, M, X, L, XXL, XL]"})
         body.availableSizes=availableSizes
     }
     if(installments){
+        if(!isValidNo(installments)) return res.status(400).json({status:false,message:"in installment use only numbers"})
         body.installments=installments
     }
    

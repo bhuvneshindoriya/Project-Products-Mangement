@@ -1,8 +1,9 @@
 const cartModel = require('../model/cartModel')
 const productModel = require('../model/productModel')
 const userModel=require('../model/userModel')
-const {isValidEmail,isValidObjectId,isValidphone,isValidBody,isValidRequestBody,isValidName,isValidpassword,isValidCity,isValidPinCode,isValidProductName,isValidPrice,isValidateSize,isValidNo,isValidImage}=require('../util/validator')
+const {isValidObjectId,}=require('../util/validator')
 
+// ------create-cart------
 exports.createCart = async function (req, res) {
   try {
       let userId = req.params.userId;
@@ -82,6 +83,8 @@ exports.createCart = async function (req, res) {
       return res.status(500).send({ status: false, message: err.message })
   }
 }
+
+// -------update-cart------
   exports.updateCart = async function (req, res) {
     try {
       //request userId from path params
@@ -188,7 +191,7 @@ exports.createCart = async function (req, res) {
   }
 
 
-
+// ------get-cart------
 exports.getCart= async function(req,res){
   try{
       const userId=req.params.userId;
@@ -207,10 +210,8 @@ catch(err){
    }
 }
 
-
-
+// ------delete-cart------
 exports.deleteCart= async function(req,res){
- 
   try{
       const userId=req.params.userId;
      
@@ -223,9 +224,7 @@ exports.deleteCart= async function(req,res){
       if(!updateData) return res.status(404).send({status:false, msg:"user not exist"})
 
       return res.status(204).send()
-
   }
-
 catch(err){     
           return res.status(500).send({status:false,message:err.message})
  }

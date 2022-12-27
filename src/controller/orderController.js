@@ -1,7 +1,8 @@
 const cartModel = require('../model/cartModel')
 const userModel = require('../model/userModel')
 const orderModel = require('../model/orderModel')
-const {isValidEmail,isValidObjectId,isValidphone,isValidBody,isValidRequestBody,isValidName,isValidpassword,isValidCity,isValidPinCode,isValidProductName,isValidPrice,isValidateSize,isValidNo,isValidImage}=require('../util/validator')
+const {isValidObjectId,isValidRequestBody}=require('../util/validator')
+
 
 exports.createOrder = async function (req, res) {
     try {

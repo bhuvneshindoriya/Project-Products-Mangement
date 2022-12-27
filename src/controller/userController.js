@@ -8,20 +8,18 @@ const {isValidEmail,isValidObjectId,isValidphone,isValidBody,isValidRequestBody,
 
 
 
-
+// -------create-user------
 exports.createUser=async (req,res)=>{
     try{
-        
         const reqBody=req.body
        if(!isValidRequestBody(req.body)) return res.status(400).json({status:false,message:"requesbody must be present"})
         const{fname,lname,phone,email,password,address}=req.body
        
         reqBody.address=JSON.parse(address)
         if(!fname) return res.status(400).json({status:false,message:"fname must be present"})
-        if (!isValidBody(fname)) { return res.status(400).send({ status: false, message: 'Please enter fname' }) }
+        if (!isValidName(fname)) { return res.status(400).send({ status: false, message: 'Please enter fname' }) }
         if(!lname) return res.status(400).json({status:false,message:"lname must be present"})
         if (!isValidName(lname)) { return res.status(400).send({ status: false, message: 'lname should be in alphabets' }) }
-        if(!password) return res.status(400).json({status:false,message:"password must be present"})
         if(!address) return res.status(400).json({status:false,message:"address must be present"})
    
         // -------email validation------
@@ -44,7 +42,7 @@ exports.createUser=async (req,res)=>{
         reqBody.profileImage= await aws.uploadFile( files[0] )
         }
         else{
-            res.status(400).send({ msg: "profileimage must be present" })
+            res.status(400).send({ message: "profileimage must be present" })
         } 
         reqBody.password=await bcrypt.hash(password,10) 
 
@@ -83,7 +81,7 @@ exports.createUser=async (req,res)=>{
     }
 }
 
-
+// -------login-user------
 exports.userLogin = async function(req,res){
   try{   let body = req.body
       let {email,password}= body
@@ -107,7 +105,7 @@ exports.userLogin = async function(req,res){
   }}
   
 
-
+// -------get-user by id------
 exports.getUser=async function(req,res){
     try{
      const userId=req.params.userId
@@ -126,14 +124,16 @@ exports.getUser=async function(req,res){
       }
   }
   
+  // -------update-user-details------
   exports.userUpdate = async function(req,res){
     try{
         let body = req.body
         let userId =  req.params.userId
         let { fname, lname, email, phone, password} = body
-      
+     
+     
         let files= req.files
-        if(files.length>0){     
+        if(files){     
         body.profileImage= await aws.uploadFile( files[0] )
         }
     

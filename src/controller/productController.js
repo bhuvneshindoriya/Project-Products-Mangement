@@ -5,7 +5,7 @@ const validator= require('../util/validator')
 //const { isValidObjectId } = require('mongoose')
 const {isValidEmail,isValidObjectId,isValidphone,isValidBody,isValidRequestBody,isValidName,isValidpassword,isValidCity,isValidPinCode,isValidProductName,isValidPrice,isValidateSize,isValidNo,isValidImage}=require('../util/validator')
 
-
+// -------create-product-------
 exports.createProduct= async function(req,res){
     let body = req.body
     if(!isValidRequestBody(req.body)) return res.status(400).json({status:false,message:"requesbody must be present"})
@@ -39,19 +39,15 @@ exports.createProduct= async function(req,res){
     return res.status(201).send({status:true,data:createUser})
 }
 
-
+// get product by querys(filter)
 exports.getProductByQuery = async function(req,res) {
 
     try {
-
         let data = req.query
-
- 
         let { size, name, priceGreaterThan, priceLessThan, priceSort} = data
 
         let obj = { isDeleted: false }
 
-      
         if (size) {
             if (!validator.isValidBody(size)) return res.status(400).send({ status: false, message: "Please enter Size" });
             obj.availableSizes = size 
@@ -63,14 +59,12 @@ exports.getProductByQuery = async function(req,res) {
             obj.title =  name 
         }
 
-
         if (priceGreaterThan) {
             if (!validator.isValidBody(priceGreaterThan)) return res.status(400).send({ status: false, message: "Please enter Price Greater Than" });
             if (!validator.isValidPrice(priceGreaterThan)) return res.status(400).send({ status: false, message: "priceGreaterThan must be number" });
             obj.price = { $gt: priceGreaterThan }
         }
 
-      
         if (priceLessThan) {
             if (!validator.isValidBody(priceLessThan)) return res.status(400).send({ status: false, message: "Please enter Price Lesser Than" });
             if (!validator.isValidPrice(priceLessThan)) return res.status(400).send({ status: false, message: "priceLessThan must be number" });
@@ -81,28 +75,23 @@ exports.getProductByQuery = async function(req,res) {
             obj.price = { $gt: priceGreaterThan, $lt: priceLessThan }
         }
 
-      
         if (priceSort) {
             if (!(priceSort == -1 || priceSort == 1)) return res.status(400).send({ status: false, message: "Please Enter '1' for Sort in Ascending Order or '-1' for Sort in Descending Order" });
         }
 
-    
         let getProduct = await productModel.find(obj).sort({ price: priceSort })
 
-   
         if (getProduct.length == 0) return res.status(404).send({ status: false, message: "Product Not Found." })
 
         return res.status(200).send({ status: true, message: "Success", data: getProduct })
 
     } catch (error) {
-
         return res.status(500).send({ status: false, message: error.message })
     }
 }
 
- 
 
-// ====> get product by product id (params) <=====
+//----- get product by product id (params)-----
 
 exports.getProduct=async function(req,res){
     try{

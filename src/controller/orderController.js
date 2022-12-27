@@ -13,9 +13,9 @@ exports.createOrder = async function (req, res) {
       // Destructuring
       const { cartId, status, cancellable } = req.body
       //request body must not be empty
-     /////////
+       if(!isValidRequestBody(req.body)) return res.status(400).send({ status: false, message: "Please provid body !!!" });
       //cartId validation => cartId is mandatory and must not be empty
-      ////////////
+      if(!cartId) return res.status(400).send({ status: false, message: "Please provide cartId !!!" });
       //cartId must be a valid objectId
       if (!isValidObjectId(cartId)) return res.status(400).send({ status: false, message: "Please provide valid cartId!" });
   
@@ -32,7 +32,9 @@ exports.createOrder = async function (req, res) {
       for (let i = 0; i < items.length; i++) {
         totalQuantity += items[i].quantity
       }
-      console.log(totalQuantity);
+
+      if(items==0) return  res.status(400).send({ status: false, message: "there is no items left for Order !!!" });
+
       // cancellable validation => if key is present value must not be empty
       if (cancellable) {
         //cancellable must be true or false
@@ -49,6 +51,8 @@ exports.createOrder = async function (req, res) {
         }
       }
   
+
+
       // Destructuring
       let order = { userId: userId, items: cartItems.items, totalPrice: cartItems.totalPrice, totalItems: cartItems.totalItems, totalQuantity: totalQuantity, cancellable: cancellable, status: status }
   
@@ -69,26 +73,39 @@ exports.createOrder = async function (req, res) {
         let data = req.body
         let userId = req.params.userId
 
+        
         let{ orderId, status} = data
+
+        if(!isValidRequestBody(data)) return res.status(400).send({ status: false, message: "Please provid body !!!" });
+
+        if(!orderId){
+          return res.status(400).send({ status : false, message : "OrderId is missing"})
+       }  
+
         if(!isValidObjectId(userId)){
             return res.status(400).send({ status : false, message : "UserId is not valid"})
         }
-         if(!orderId){
-            return res.status(400).send({ status : false, message : "OrderId is missing"})
-         }
+         
+        if (!isValidObjectId(orderId)) return res.status(400).send({ status: false, message: "Please provide valid orderId!" });
+         
          let checkStatus = await orderModel.findById(orderId)
          if(checkStatus.cancellable==false) return res.status(400).send({status:false,message:"This order can't be cancellable"})
 
         let newStatus = {}
         if(status){
-            if(!(status =="completed" || status == "cancled")){
-                return res.status(400).send({ status : false, message : "status can be from enum only"})
-            }else{
-                newStatus.status = status
+            if(!(status =="completed" || status == "canceled")){
+                return res.status(400).send({ status : false, message : "status can be from enum only like [completed , canceled ]"})
+            }
+            else{
+              newStatus.status=status
             }
         }
-
-        const orderCancel = await orderModel.findOneAndUpdate({ _id: orderId },newStatus,{ new: true });
+        else{
+          return res.status(400).send({status:false,message:" Please take status in req body for update the product !!!"})
+        }
+           
+      
+        const orderCancel = await orderModel.findOneAndUpdate({ _id: orderId },{$set:newStatus},{ new: true });
         return res.status(200).send({ status: true, message: "Success", data: orderCancel });
     }catch(err){
        return res.status(500).send({message:err.message})

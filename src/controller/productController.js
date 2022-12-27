@@ -20,6 +20,10 @@ exports.createProduct= async function(req,res){
     if(!availableSizes) return res.status(400).json({status:false,message:"availablesizes must be present"})
     if(!isValidateSize(availableSizes)) return res.status(400).json({status:false,message:"only use[S, XS, M, X, L, XXL, XL]"})
 
+    if(installments){
+        if(!isValidNo(installments)) return res.status(400).json({status:false,message:"in installment use only numbers"})
+    }
+
     //if(!isValidNo(installments)) return res.status(400).json({status:false,message:"use only numbers[0-9]"})
     // ------title validation-----
     if(!title) return res.status(400).json({status:false,message:"title must be present"})
@@ -35,8 +39,8 @@ exports.createProduct= async function(req,res){
         else{
             res.status(400).send({ msg: "productimage must be present" })
         } 
-    let createUser = await productModel.create(body)
-    return res.status(201).send({status:true,data:createUser})
+    let createProduct = await productModel.create(body)
+    return res.status(201).send({status:true,data:createProduct})
 }
 
 // get product by querys(filter)
@@ -119,30 +123,35 @@ exports.updateProduct= async function(req,res){
    if(!isValidRequestBody(body)) return res.status(400).send({status:false,message:"Please enter atleast one update"})
     if(!isValidObjectId(productId)) return res.status(400).send({status:false,message:"Please enter valid productId in params"})
     if(title){
+        if(!isValidName(title)) return res.status(400).send({status:false,message:"in title use only alphabates"})
         let checkTitle =  await productModel.findOne({title:title})
-        if(checkTitle) return res.status(400).send({status:false,message:"Please provide another title"})
+        if(checkTitle) return res.status(400).send({status:false,message:"title is already present"})
         body.title= title
     }
     if(files.length>0){     
         body.productImage= await aws.uploadFile( files[0] )
-        console.log(obj.productImage)
         }
     if(description){
+        if(!isValidName(description)) return res.status(400).send({status:false,message:"in description use only alphabates"})
         body.description= description
     }
     if(price){
+        if(!isValidPrice(price)) return res.status(400).send({status:false,message:"in price use only numbers"})
         body.price=price
     }
     if(isFreeShipping){
         body.isFreeShipping=isFreeShipping
     }
     if(style){
+        if(!isValidName(description)) return res.status(400).send({status:false,message:"in style use only alphabates"})
         body.style=style
     }
     if(availableSizes){
+        if(!isValidateSize(availableSizes)) return res.status(400).json({status:false,message:"only use[S, XS, M, X, L, XXL, XL]"})
         body.availableSizes=availableSizes
     }
     if(installments){
+        if(!isValidNo(installments)) return res.status(400).json({status:false,message:"in installment use only numbers"})
         body.installments=installments
     }
    

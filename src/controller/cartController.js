@@ -171,7 +171,7 @@ exports.createCart = async function (req, res) {
             // decreasing totalItems quantity by 1     
             allItems = cart.totalItems - 1
             // deleting product from items array            
-            cartItems.splice(i, 1)
+            cartItems.splice(i, cartItems.length)
             break;
           }
         }

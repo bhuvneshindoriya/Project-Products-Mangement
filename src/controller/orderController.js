@@ -7,9 +7,6 @@ exports.createOrder = async function (req, res) {
     try {
       //request userId from path params
       const userId = req.params.userId
-      //userId must be a valid objectId
-     // if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: "Please provide valid User Id!" });
-  
       // Destructuring
       const { cartId, status, cancellable } = req.body
       //request body must not be empty

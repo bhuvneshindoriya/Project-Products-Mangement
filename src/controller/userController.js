@@ -136,15 +136,17 @@ exports.getUser=async function(req,res){
         let userId =  req.params.userId
 
         let { fname, lname, email, phone, password,address} = body
-
+       
+        
+     
+      
        if(!isValidRequestBody(body)) return res.status(400).send({status:false,messsage:"Please provide body"})
 
-        let files= req.files
-        if(files){     
+       let files= req.files
+       if(files.length>0){     
 
-        body.profileImage= await aws.uploadFile( files[0] )
-        }
-  
+       body.profileImage= await aws.uploadFile( files[0] )
+       }
         if(fname){
             if(!isValidName(fname)) return res.status(400).send({status:false,message:"please provide valid fname"})
         }
@@ -162,7 +164,7 @@ exports.getUser=async function(req,res){
             if(!isValidphone(phone)) return res.status(400).send({status:false,message:"Please provide valid phone number"})
         }
        
-         if(address){
+        if(address){
     try {
         if(typeof req.body.address !== 'object') req.body.address = JSON.parse(req.body.address)
     } catch (err) {
@@ -189,7 +191,7 @@ exports.getUser=async function(req,res){
      
         let findUser = await userModel.findOneAndUpdate({_id:userId},{$set:body},{new:true})
         if(!findUser)  return res.status(404).send({status:false,message:"UserId is not found"})
-        return res.status(200).send({status:true,message:"User profile updated",data:findUser})
+        return res.status(200).json({status:true,message:"User profile updated",data:findUser})
     } catch(err){
         return res.status(500).send({status:false,message:err.message})
     }

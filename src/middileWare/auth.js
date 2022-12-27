@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const cartModel = require('../model/cartModel');
+const {isValidObjectId}= require('../util/validator')
 
 const userModel= require("../model/userModel");
 
@@ -31,6 +32,8 @@ exports.authenticate = (req, res, next) => {
 exports.authorize= async function ( req, res, next) {
     try{
           let userId= req.params.userId
+          if(!isValidObjectId(userId)) return res.status(400).send({status:false,message:"Inavlid userId"})
+
           let gettingUserId= await userModel.findById({_id: userId})
           if(!gettingUserId) return res.status(404).send({status:false,message:"this userId is not found"})
 

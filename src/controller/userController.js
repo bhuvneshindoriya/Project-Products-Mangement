@@ -14,16 +14,16 @@ exports.createUser=async (req,res)=>{
         
         const reqBody=req.body
        if(!isValidRequestBody(req.body)) return res.status(400).json({status:false,message:"requesbody must be present"})
-        const{fname,lname,phone,email,password,address}=req.body
-       
-        reqBody.address=JSON.parse(address)
+        let{fname,lname,phone,email,password,address}=req.body
+      
         if(!fname) return res.status(400).json({status:false,message:"fname must be present"})
         if (!isValidBody(fname)) { return res.status(400).send({ status: false, message: 'Please enter fname' }) }
         if(!lname) return res.status(400).json({status:false,message:"lname must be present"})
         if (!isValidName(lname)) { return res.status(400).send({ status: false, message: 'lname should be in alphabets' }) }
         if(!password) return res.status(400).json({status:false,message:"password must be present"})
         if(!address) return res.status(400).json({status:false,message:"address must be present"})
-   
+    
+        reqBody.address=JSON.parse(address)
         // -------email validation------
         if(!email) return res.status(400).json({status:false,message:"email must be present"})
         if(!isValidEmail(email)) return res.status(400).json({status:true,message:"please provide valid email"})
@@ -44,34 +44,38 @@ exports.createUser=async (req,res)=>{
         reqBody.profileImage= await aws.uploadFile( files[0] )
         }
         else{
-            res.status(400).send({ msg: "profileimage must be present" })
+            res.status(400).send({ message: "profileimage must be present" })
         } 
         reqBody.password=await bcrypt.hash(password,10) 
-
-      
-        // let newaddress=JSON.parse(address)
-        // let {shipping,billing}=newaddress
         
-        // if (!shipping.street) return res.status(400).send({ status: false, message: "Enter Shipping Address." })
+      if(!address) return res.status(400).send({status:false,message:"address is required"})
+       address=JSON.parse(address)
+        //let {shipping,billing}=newaddress
+        
+        if (!address.shipping.street) return res.status(400).send({ status: false, message: "Enter Shipping Address." })
+        if(!address.shipping.street) return res.status(400).send({status:false,message:"shipping street is required"})
+        if (!isValidBody(address.shipping.street)) { return res.status(400).send({ status: false, message: 'Please enter Shipping street' }) }
 
-        // if (!isValidBody(shipping.street)) { return res.status(400).send({ status: false, message: 'Please enter Shipping street' }) }
+        // if (!isValidCityc(shipping.city)) { return res.status(400).send({ status: false, message: 'Please enter Shipping city' }) }
+        if(!address.shipping.city) return res.status(400).send({status:false,message:"shipping city is required"})
+        if (!isValidCity(address.shipping.city)) { return res.status(400).send({ status: false, message: 'Invalid Shipping city' }) }
+       
+        // if (!isValidBody(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Please enter Shipping pin' }) }
+        if (!isValidPinCode(address.shipping.pincode)|| isNaN(address.shipping.pincode)) { return res.status(400).send({ status: false, message: 'Invalid Shipping Pin Code.' }) }
+        if(!address.shipping.pincode) return res.status(400).send({status:false,message:"shipping pincode is required"})
 
-        // // if (!isValidCityc(shipping.city)) { return res.status(400).send({ status: false, message: 'Please enter Shipping city' }) }
-        // if (!isValidCity(shipping.city)) { return res.status(400).send({ status: false, message: 'Invalid Shipping city' }) }
+        if (!address.billing) return res.status(400).send({ status: false, message: "please enter billing" })
 
-        // // if (!isValidBody(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Please enter Shipping pin' }) }
-        // if (!isValidPinCode(shipping.pincode)) { return res.status(400).send({ status: false, message: 'Invalid Shipping Pin Code.' }) }
+        if (!isValidBody(address.billing.street)) { return res.status(400).send({ status: false, message: 'Please enter billing street' }) }
+        if(!address.billing.street) return res.status(400).send({status:false,message:"billing street is required"})
 
+        if(!address.billing.city) return res.status(400).send({status:false,message:"billing city is required"})
+        if (!isValidBody(address.billing.city)) { return res.status(400).send({ status: false, message: 'Please enter billing city' }) }
+        if (!isValidCity(address.billing.city)) { return res.status(400).send({ status: false, message: 'Invalid billing city' }) }
 
-        // // //if (!billing) return res.status(400).send({ status: false, message: "please enter billing" })
-
-        // // if (!isValidBody(billing.street)) { return res.status(400).send({ status: false, message: 'Please enter billing street' }) }
-
-        // // if (!isValidBody(billing.city)) { return res.status(400).send({ status: false, message: 'Please enter billing city' }) }
-        // // if (!isValidCity(billing.city)) { return res.status(400).send({ status: false, message: 'Invalid billing city' }) }
-
-        // // if (!isValidBody(billing.pincode)) { return res.status(400).send({ status: false, message: 'Please enter billing pin' }) }
-        // // if (!isValidPinCode(billing.pincode)) { return res.status(400).send({ status: false, message: 'Invalid billing Pin Code.' }) }
+        if(!address.billing.pincode) return res.status(400).send({status:false,message:"billing pincode is required"})
+        if (!isValidBody(address.billing.pincode)) { return res.status(400).send({ status: false, message: 'Please enter billing pin' }) }
+        if (!isValidPinCode(address.billing.pincode)|| isNaN(address.billing.pincode)) { return res.status(400).send({ status: false, message: 'Invalid billing Pin Code.' }) }
 
         //-------create aws-s3 link------
        
@@ -79,7 +83,7 @@ exports.createUser=async (req,res)=>{
         const createdata=await userModel.create(reqBody)
        return res.status(201).json({status:true,message:'User created successfully',data:createdata})
     }catch(error){
-        return res.status(500).json({error:error.message})
+        return res.status(500).json({status:false,message:error.message})
     }
 }
 
@@ -113,12 +117,13 @@ exports.getUser=async function(req,res){
      const userId=req.params.userId
   
     if (!isValidObjectId(userId)) return res.status(400).send({status : false , message : "invalid userId"})
+    const userIs=await userModel.findById({_id:userId})
+
+    if (!userIs) return res.status(404).send({status : false , message : "no user present with this userId"})  
   
      if (req.decode.userId!=userId) return res.status(403).send({status : false , message : "not authorised"})
   
-     const userIs=await userModel.findById({_id:userId})
 
-     if (!userIs) return res.status(404).send({status : false , message : "no user present with this id"})  
      return res.status(200).send({status : true ,message: "User profile details", data : userIs})
   
       }catch(error){
@@ -130,13 +135,14 @@ exports.getUser=async function(req,res){
     try{
         let body = req.body
         let userId =  req.params.userId
-        let { fname, lname, email, phone, password} = body
-      
+        let { fname, lname, email, phone, password,address} = body
+
+       if(!isValidRequestBody(body)) return res.status(400).send({status:false,messsage:"Please provide body"})
         let files= req.files
-        if(files.length>0){     
+        if(files>0){     
         body.profileImage= await aws.uploadFile( files[0] )
         }
-    
+  
         if(fname){
             if(!isValidName(fname)) return res.status(400).send({status:false,message:"please provide valid fname"})
         }
@@ -154,24 +160,31 @@ exports.getUser=async function(req,res){
             if(!isValidphone(phone)) return res.status(400).send({status:false,message:"Please provide valid phone number"})
         }
        
-
-        // let {shipping, billing} = body.address
-        // if(shipping){
-        //     if(!isValidCity(shipping.city)){
-        //         return res.status(400).send({status:false,message:"Please provide valid city"})
-        //     }
-        //     if(!isValidPinCode(shipping.pincode)){
-        //         return res.status(400).send({status:false,message:"please provide valid pincode"})
-        //     }
-        // }
-        // if(billing){
-        //     if(!isValidCity(billing.city)){
-        //         return res.status(400).send({status:false,message:"Please provide valid city"})
-        //     }
-        //     if(!isValidPinCode(billing.pincode)){
-        //         return res.status(400).send({status:false,message:"please provide valid pincode"})
-        //     }
-        // }
+         if(address){
+    try {
+        if(typeof req.body.address !== 'object') req.body.address = JSON.parse(req.body.address)
+    } catch (err) {
+      return res.status(400).send({status:false,message:"Enter Valid JSON Address !"})
+    }
+        
+        if(address.shipping){
+            if(!isValidCity(address.shipping.city)){
+                return res.status(400).send({status:false,message:"Please provide valid city"})
+            }
+            if(!isValidPinCode(address.shipping.pincode)|| isNaN(address.shipping.pincode)){
+                return res.status(400).send({status:false,message:"please provide valid pincode"})
+            }
+        }
+        if(address.billing){
+            if(!isValidCity(address.billing.city)){
+                return res.status(400).send({status:false,message:"Please provide valid city"})
+            }
+            if(!isValidPinCode(address.billing.pincode)|| isNaN(address.billing.pincode)){
+                return res.status(400).send({status:false,message:"please provide valid pincode"})
+            }
+        }}
+   
+     
         let findUser = await userModel.findOneAndUpdate({_id:userId},{$set:body},{new:true})
         if(!findUser)  return res.status(404).send({status:false,message:"UserId is not found"})
         return res.status(200).send({status:true,message:"User profile updated",data:findUser})

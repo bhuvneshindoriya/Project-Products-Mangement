@@ -12,7 +12,7 @@ exports.createProduct= async function(req,res){
     const{title,description,price,availableSizes,installments}=body
 
     if(!description) return res.status(400).json({status:false,message:"description must be present"})
-    if(!isValidName(description)) return res.status(400).json({status:false,message:"please only use a-z & A-Z alphabates"})
+   // if(!isValidName(description)) return res.status(400).json({status:false,message:"please only use a-z & A-Z alphabates"})
 
     if(!price) return res.status(400).json({status:false,message:"price must be present"})
     if(!isValidNo(price)) return res.status(400).json({status:false,message:"please use only numbers(0-9)"})
@@ -23,7 +23,7 @@ exports.createProduct= async function(req,res){
     //if(!isValidNo(installments)) return res.status(400).json({status:false,message:"use only numbers[0-9]"})
     // ------title validation-----
     if(!title) return res.status(400).json({status:false,message:"title must be present"})
-    if(!isValidName(title)) return res.status(400).json({status:false,message:"please only use a-z & A-Z alphabates"})
+   // if(!isValidName(title)) return res.status(400).json({status:false,message:"please only use a-z & A-Z alphabates"})
     const checktitle=await productModel.findOne({title})
     if(checktitle) return res.status(400).json({status:false,message:"title is already present"})
     // ------create aws-s3 link-----
@@ -33,12 +33,13 @@ exports.createProduct= async function(req,res){
         body.productImage= await aws.uploadFile( files[0] )
         }
         else{
-            res.status(400).send({ msg: "productimage must be present" })
+            res.status(400).send({ message: "productimage must be present" })
         } 
     let createUser = await productModel.create(body)
-    return res.status(201).send({status:true,data:createUser})
+    return res.status(201).send({status:true,message:"Success",data:createUser})
 }
-
+//isvalidName validation
+//message sccesss
 
 exports.getProductByQuery = async function(req,res) {
 
@@ -114,7 +115,7 @@ exports.getProduct=async function(req,res){
 
       if (!productData) return res.status(404).send({status : false , message : "product not exist in db"})
 
-      return res.status(200).send({status : true ,message: "product profile details", data : productData})
+      return res.status(200).send({status : true ,message: "Success", data : productData})
       
     }catch(error){
         return res.status(500).send({status:false , message : error.message})
@@ -159,7 +160,7 @@ exports.updateProduct= async function(req,res){
    
     let productUpdate = await productModel.findOneAndUpdate({isDeleted:false,_id:productId},{$set:body},{new:true})
     if(!productUpdate) return res.status(404).send({status:false,message:"product not found"})
-    return res.status(200).send(({status:true,data:productUpdate}))
+    return res.status(200).send(({status:true,message:"Success",data:productUpdate}))
 }catch(error){
     return res.status(500).send({status:false,message:error.message})
 }

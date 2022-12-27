@@ -61,7 +61,7 @@ exports.createOrder = async function (req, res) {
       //update cart on successfully complition of order and set cart as empty
       await cartModel.findOneAndUpdate({ userId: userId, isDeleted: false }, { $set: { items: [], totalPrice: 0, totalItems: 0 } })
       //Successfull oreder details return response to body
-      return res.status(201).send({ status: true, message: `Order created successfully`, data: orderCreation });
+      return res.status(201).send({ status: true, message: `Success`, data: orderCreation });
     }
     catch (error) {
       res.status(500).send({ status: false, message: error.message });

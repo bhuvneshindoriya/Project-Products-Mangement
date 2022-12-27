@@ -4,7 +4,9 @@ const {createUser,userLogin,getUser,userUpdate}=require("../controller/userContr
 const {createProduct, getProduct, getProductByQuery, updateProduct, deletProduct}= require('../controller/productController')
 const {authenticate,authorize}=require('../middileWare/auth');
 
-const { createCart, updateCart,getCart , deleteCart } = require("../controller/cartController");
+
+const { createCart, updateCart,getCart,deleteCart} = require("../controller/cartController");
+
 const {createOrder, updateOrder}= require('../controller/orderController')
 
 
@@ -35,6 +37,9 @@ router.delete('/users/:userId/cart',authenticate,deleteCart)
 
 //**order*/
 router.post('/users/:userId/orders',authenticate,authorize,createOrder)
+
 router.put('/users/:userId/orders',authenticate,authorize,updateOrder)
+
+
 
 module.exports = router

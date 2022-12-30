@@ -12,6 +12,7 @@ const {isValidEmail,isValidObjectId,isValidphone,isValidBody,isValidRequestBody,
 exports.createUser=async (req,res)=>{
     try{
         const reqBody=req.body
+      
        if(!isValidRequestBody(req.body)) return res.status(400).json({status:false,message:"requesbody must be present"})
         let{fname,lname,phone,email,password,address}=req.body
       
@@ -136,10 +137,6 @@ exports.getUser=async function(req,res){
         let userId =  req.params.userId
 
         let { fname, lname, email, phone, password,address} = body
-       
-        
-     
-      
        if(!isValidRequestBody(body)) return res.status(400).send({status:false,messsage:"Please provide body"})
 
        let files= req.files

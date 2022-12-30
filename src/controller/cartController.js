@@ -15,7 +15,7 @@ exports. createCart = async function (req, res) {
       if(!isValidObjectId(productId)) return res.status(400).send(({status:false , message:"Please provide valid product Id"}))
 
       if(!isValidObjectId(userId)) return res.status(400).send(({status:false , message:"Please provide valid user Id"}))
-      let ProductData = await productModel.findOne({ _id: productId })
+      let ProductData = await productModel.findOne({ _id: productId,isDeleted :false})
       if (ProductData == null) {
           return res.status(404).send({ status: false, message: "productId is not found" })
       }
@@ -111,7 +111,7 @@ exports.updateCart = async function (req, res) {
 
      for (let i = 0; i < findCart.items.length; i++) {
  
-         if (findProduct._id == findCart.items[i].productId) {
+         if (findProduct._id.toString() == findCart.items[i].productId.toString()) {
              if (removeProduct == 1 && findCart.items[i].quantity > 1) {
                  let updateCart = await cartModel.findOneAndUpdate({ _id: cartId, "items.productId": productId }, { $inc: { "items.$.quantity": -1, totalPrice: -(findProduct.price) } }, { new: true }).select({ __v: 0, "items._id": 0 })
                  return res.status(200).send({ status: true, message: "cart updated successfully", data: updateCart })
@@ -168,3 +168,18 @@ catch(err){
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//server-client side randring
